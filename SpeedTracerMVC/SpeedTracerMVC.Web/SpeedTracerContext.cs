@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Web;
     using System.Diagnostics;
+    using System.Text.RegularExpressions;
 
     public class Tracer : IDisposable
     {
@@ -13,6 +14,9 @@
         private DateTime endTime;
         private string section;
         private List<SpeedTracerData> childData = new List<SpeedTracerData>();
+        private string className;
+        private string methodName;
+        private string lineNumber;
 
         private Tracer()
             : this(null)
@@ -34,7 +38,23 @@
             }
 
             this.startTime = DateTime.Now;
-            Debug.WriteLine(section + ":StartTime:" + this.startTime.ToUnix().ToString());
+
+            try
+            {
+                var stackTrace = Environment.StackTrace.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+                var regex = new Regex(@"^\s*at\s+(.*)\s+in\s+(.*)\s(\d+)$");
+
+                var rawStack = stackTrace[4];
+                var match = regex.Match(rawStack);
+
+                this.methodName = match.Groups[1].Value;
+                this.className = match.Groups[2].Value;
+                this.lineNumber = match.Groups[3].Value;
+            }
+            catch
+            {
+            }
         }
 
         public static Tracer Trace(string section)
@@ -64,7 +84,6 @@
         public void Dispose()
         {
             this.endTime = DateTime.Now;
-            Debug.WriteLine(section + ":EndTime:" + this.endTime.ToUnix().ToString());
 
             if (this.parent != null)
             {
@@ -74,13 +93,7 @@
             }
             else
             {
-                var data = new SpeedTracerData
-                {
-                    Section = this.section,
-                    EndTime = this.endTime,
-                    StartTime = this.startTime,
-                    Children = this.childData
-                };
+                var data = new SpeedTracerData { Section = section, StartTime = startTime, EndTime = endTime, Children = childData, ClassName = this.className, MethodName = this.methodName, LineNumber = this.lineNumber };
 
                 HttpContext.Current.Application["Trace:" + HttpContext.Current.Items["TraceId"]] = data;
             }
@@ -88,7 +101,7 @@
 
         private void SaveChildData(string section, DateTime startTime, DateTime endTime, IEnumerable<SpeedTracerData> childData)
         {
-            this.childData.Add(new SpeedTracerData { Section = section, StartTime = startTime, EndTime = endTime, Children = childData });
+            this.childData.Add(new SpeedTracerData { Section = section, StartTime = startTime, EndTime = endTime, Children = childData, ClassName = this.className, MethodName = this.methodName, LineNumber = this.lineNumber });
         }
     }
 }

@@ -8,6 +8,11 @@
     {
         private static object ToPlainObject(SpeedTracerData trace)
         {
+            if (trace == null)
+            {
+                return null;
+            }
+
             var startTime = trace.StartTime.ToUnix() * 1000 + trace.StartTime.Millisecond;
             var endTime = trace.EndTime.ToUnix() * 1000 + trace.EndTime.Millisecond;
             var duration = endTime - startTime;
@@ -25,9 +30,9 @@
                 {
                     sourceCodeLocation = new
                     {
-                        className = "",
-                        methodName = "",
-                        lineNumber = 0
+                        className = trace.ClassName,
+                        methodName = trace.MethodName,
+                        lineNumber = trace.LineNumber
                     },
                     type = "METHOD",
                     label = trace.Section
