@@ -1,0 +1,43 @@
+﻿namespace SpeedTracer
+{
+    using System;
+    using System.Collections.Generic;
+
+    public class SpeedTracerData
+    {
+        public SpeedTracerData()
+        {
+            this.Children = new SpeedTracerData[0];
+        }
+
+        public string Section
+        {
+            get;
+            set;
+        }
+
+        public DateTime StartTime
+        {
+            get;
+            set;
+        }
+
+        public DateTime EndTime
+        {
+            get;
+            set;
+        }
+
+        public IEnumerable<SpeedTracerData> Children
+        {
+            get;
+            set;
+        }
+
+        public string LineNumber { get; set; }
+
+        public string MethodName { get; set; }
+
+        public string ClassName { get; set; }
+    }
+}

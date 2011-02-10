@@ -20,14 +20,15 @@ namespace SpeedTracerMVC.Web
 
         public static void RegisterRoutes(RouteCollection routes)
         {
-            
-
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
             routes.MapRoute(
                 "speedtracer",
                 "speedtracer",
-                new { controller = "SpeedTracer", action = "ReadTrace" });
+                new { controller = "SpeedTracer", action = "ReadTrace" }, null, new[] 
+                {
+                    "SpeedTracer"
+                });
 
             routes.MapRoute(
                 "Default", // Route name
